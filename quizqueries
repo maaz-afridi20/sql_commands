@@ -1,0 +1,100 @@
+/* 1.Display all types of vaccines */
+SELECT * FROM `type`
+
+/* 2.Display vaccination’s
+	a.Name
+	b.Dose
+	c.Quantity
+	d.Life
+*/
+SELECT `Name`, `NoDose`, `Quantity`, `Life` FROM `type`
+
+/* 3.Display average lifetime of all vaccines */
+SELECT AVG(`Life`) AS `Average Life` FROM `type`
+
+/* 4.Display minimum life vaccine among vaccinations */
+SELECT * FROM `type` WHERE `Life` = (SELECT MIN(`Life`) FROM `type`)
+
+/* 5.Display vaccines having maximum life. */
+SELECT * FROM `type` WHERE `Life` = (SELECT MAX(`Life`) FROM `type`)
+
+/* 6.Display expiry date in front of each type. */
+/* Based on current date */
+SELECT `Name`, ADDDATE(CURDATE(), `Life`) AS `Expiry` FROM `type`
+/* Based on MfgDate */
+SELECT `Name`, ADDDATE(`MfgDate`, `Life`) AS `Expiry` FROM `type` INNER JOIN `vaccine` 
+ON `type`.`Id` = `vaccine`.`TypeId` GROUP BY `Name`
+
+/* 7.Display the total no. of centers. */
+SELECT COUNT(`Id`) AS `No of centers` FROM `center`
+
+/* 8.Display the total no. of types. */
+SELECT COUNT(`Id`) AS `No of types` FROM `type`
+
+/* 9.Display the total number of vaccines. */
+SELECT COUNT(`Id`) AS `Total no of vaccines` FROM `vaccine`
+
+/* 10.Display no. of vaccines of each type. */
+SELECT `Name`, COUNT(`TypeId`) AS `No of vaccines` FROM `type` INNER JOIN `vaccine` 
+ON `type`.`Id` = `vaccine`.`TypeId` GROUP BY `Name`
+
+/* 11.Display the no. of vaccines of each type available in stock but not assigned to center. */
+SELECT `Name`, COUNT(`TypeId`) AS `No of vaccines` FROM `type` INNER JOIN `vaccine` 
+ON `type`.`Id` = `vaccine`.`TypeId` AND `vaccine`.`CenterId` IS NULL GROUP BY `Name`
+
+/* 12.Display vaccines having life above the average life of all vaccines. */
+SELECT * FROM `type` WHERE `Life` > (SELECT AVG(`Life`) FROM `type`)
+
+/* 13.Display no. of subjects. */
+SELECT * FROM `subject`
+
+/* 14.Display no. of subjects from Kohat. */
+SELECT * FROM `subject` WHERE `Address` = 'Kohat'
+
+/* 15.Display the no. of subjects having CNIC starting with ‘14301’. */
+SELECT * FROM `subject` WHERE `CNIC` LIKE '14301-%'
+
+/* 16.Display subjects having Telenor contacts. */
+SELECT * FROM `subject` WHERE `Contact` BETWEEN "0340%" AND "0349%"
+
+/* 17.Display subjects having no contact no’s. */
+SELECT * FROM `subject` WHERE `Contact` IS NULL
+
+/* 18.Display subjects not vaccinated yet. */
+SELECT * FROM `subject` LEFT JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+WHERE `subject_vaccination`.`SubjectId` IS NULL
+
+/* 19.Display subjects registered before 1st June but not vaccinated yet. */
+SELECT * FROM `subject` INNER JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+WHERE `subject_vaccination`.`Date` < '2021-06-01'  AND `subject_vaccination`.`DoseNo` IS NULL
+
+/* 20.Display subjects having received dose-1. */
+SELECT * FROM `subject` INNER JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+WHERE `subject_vaccination`.`DoseNo` = 'Dose_1'
+
+/* 21.How many subjects have been vaccinated once? */
+SELECT Count(`subject`.`Id`) as `Vaccinated Once` FROM `subject` INNER JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+WHERE `subject_vaccination`.`DoseNo` = 'Dose_1'
+
+/* 22.Display subjects vaccinated twice. */
+SELECT COUNT(`subject`.`Id`) AS `Vaccinated Once` FROM `subject` INNER JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+WHERE `subject_vaccination`.`DoseNo` = 'Dose_2'
+
+/* 23.Display how many subjects have been vaccinated from center ‘6’. */
+SELECT COUNT(`subject`.`Id`) AS `Vaccinated Once` FROM `subject` INNER JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+WHERE `subject_vaccination`.`CenterId` = 6
+
+/* 24.Display how many subjects have been vaccinated with ‘Sinovac’. */
+SELECT COUNT(`subject`.`Id`) AS `Vaccinated Once` FROM `subject` 
+JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+JOIN `vaccine` ON `subject_vaccination`.`VaccineId` = `vaccine`.`Id`
+JOIN `type` ON `vaccine`.`TypeId` = `type`.`Id`
+WHERE `type`.`Name` = 'Sinovac'
+
+
+/* 25.Display how many subjects vaccinated with Sinovac are from center ‘6’. */
+SELECT COUNT(`subject`.`Id`) AS `Vaccinated Once` FROM `subject` 
+JOIN `subject_vaccination` ON `subject`.`Id` = `subject_vaccination`.`SubjectId`
+JOIN `vaccine` ON `subject_vaccination`.`VaccineId` = `vaccine`.`Id`
+JOIN `type` ON `vaccine`.`TypeId` = `type`.`Id`
+WHERE `type`.`Name` = 'Sinovac' AND `subject_vaccination`.`CenterId` = 6

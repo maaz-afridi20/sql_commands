@@ -1,0 +1,2 @@
+DELETE FROM mashk
+WHERE price 50
